@@ -1,4 +1,4 @@
-package Projeto;
+package Telas;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
@@ -47,12 +47,23 @@ public class Tela_opcao_pedido extends JFrame {
 		panel.setLayout(null);
 		
 		JButton bt_criar_pedido = new JButton("Criar Pedido");
+		bt_criar_pedido.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				Tela_pedido_info tela_pedido_info = new Tela_pedido_info();
+				tela_pedido_info.setTipo("Criação de Pedido", 2);
+				tela_pedido_info.setVisible(true);
+				dispose();
+			}
+		});
 		bt_criar_pedido.setBounds(67, 102, 137, 23);
 		panel.add(bt_criar_pedido);
 		
 		JButton bt_show_pedido = new JButton("Visualizar Pedido");
 		bt_show_pedido.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				Tela_id_pedido tela_id_pedido = new Tela_id_pedido();
+				tela_id_pedido.setVisible(true);
+				dispose();
 			}
 		});
 		bt_show_pedido.setBounds(67, 42, 137, 23);

@@ -55,6 +55,7 @@ public class Tela_pedido_info extends JFrame {
 	private JTextField tf_empl_nome;
 	private JTextField tf_data_pedido;
 	private JLabel tl_data_pedido;
+	private JLabel tl_pedido_id;
 	private JTextField tf_data_requerida;
 	private JLabel tl_data_requerida;
 	private JLabel tl_data_envio;
@@ -117,7 +118,7 @@ public class Tela_pedido_info extends JFrame {
 		tf_pedido_Id.setBounds(115, 76, 212, 20);
 		panel.add(tf_pedido_Id);
 
-		JLabel tl_pedido_id = new JLabel("Pedido ID:");
+		tl_pedido_id = new JLabel("Pedido ID:");
 		tl_pedido_id.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		tl_pedido_id.setBounds(38, 76, 78, 20);
 		panel.add(tl_pedido_id);
@@ -220,9 +221,16 @@ public class Tela_pedido_info extends JFrame {
 		bt_voltar = new JButton("Voltar");
 		bt_voltar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				Tela_id_pedido tela_id_pedido = new Tela_id_pedido();
-				tela_id_pedido.setVisible(true);
-				dispose();
+				if (tipo == 1) {
+					Tela_id_pedido tela_id_pedido = new Tela_id_pedido();
+					tela_id_pedido.setVisible(true);
+					dispose();
+				} else if (tipo == 2) {
+					Tela_opcao_pedido tela_opcao_pedido = new Tela_opcao_pedido();
+					tela_opcao_pedido.setVisible(true);
+					dispose();
+				}
+
 			}
 		});
 		bt_voltar.setBounds(721, 484, 97, 23);
@@ -362,7 +370,8 @@ public class Tela_pedido_info extends JFrame {
 			bt_delete.hide();
 
 		} else if (tipo == 2) {
-			tf_pedido_Id.setEditable(true);
+			tl_pedido_id.hide();
+			tf_pedido_Id.hide();
 			tf_cliente_id.setEditable(true);
 			tf_cliente_nome.hide();
 			tf_empl_id.setEditable(true);
@@ -414,10 +423,11 @@ public class Tela_pedido_info extends JFrame {
 	public void criarPedido() throws ParseException {
 		Mensagem mensg = new Mensagem();
 
-		if (tf_pedido_Id.getText().equals("")) {
-			mensg.setMensage("Não é permitido Pedido ID em branco");
-			mensg.setVisible(true);
-		} else if (table_order_details.getModel().getRowCount() == 0) {
+		/*
+		 * if (tf_pedido_Id.getText().equals("")) {
+		 * mensg.setMensage("Não é permitido Pedido ID em branco");
+		 * mensg.setVisible(true); } else
+		 */if (table_order_details.getModel().getRowCount() == 0) {
 			mensg.setMensage("Não é permitido criar pedido sem produto");
 			mensg.setVisible(true);
 		} else if (table_order_details.getModel().getValueAt(0, 0).equals("")) {
@@ -444,19 +454,23 @@ public class Tela_pedido_info extends JFrame {
 					mensg.setVisible(true);
 				} else {
 					order = MontaPedido();
-					boolean insert_suc = false;
-
+					int pedido_Criado = 0;
 					try {
-						insert_suc = bd.inserirPedido(order);
+						bd.conexao();
+					} catch (ClassNotFoundException | SQLException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					try {
+						pedido_Criado = bd.inserirPedido(order);
 					} catch (SQLException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
 
-					if (insert_suc == true) {
-						Orders order_refresh = new Orders();
-						setDados(order_refresh);
-						mensg.setMensage("Pedido criado com sucesso");
+					if (pedido_Criado != 0) {
+						refreshDados();
+						mensg.setMensage("Pedido " + pedido_Criado + " criado com sucesso");
 						mensg.setVisible(true);
 					} else {
 						mensg.setMensage("Não foi possível criar Pedido");
@@ -575,7 +589,7 @@ public class Tela_pedido_info extends JFrame {
 
 		for (int i = 0; i < rows; i++) {
 			od = new Order_Details();
-			od.setOrderID(Integer.parseInt(tf_pedido_Id.getText()));
+			// od.setOrderID(Integer.parseInt(tf_pedido_Id.getText()));
 			od.setProdutoID(Integer.parseInt(table_order_details.getModel().getValueAt(i, 0).toString()));
 
 			BigDecimal unit_price = new BigDecimal(table_order_details.getModel().getValueAt(i, 1).toString());
@@ -586,7 +600,7 @@ public class Tela_pedido_info extends JFrame {
 			OD[i] = od;
 		}
 
-		order.setOrderID(Integer.parseInt(tf_pedido_Id.getText()));
+		// order.setOrderID(Integer.parseInt(tf_pedido_Id.getText()));
 		order.setCustomerID(tf_cliente_id.getText());
 		order.setEmployeeID(Integer.parseInt(tf_empl_id.getText()));
 
@@ -611,10 +625,27 @@ public class Tela_pedido_info extends JFrame {
 			BigDecimal frete = new BigDecimal(tf_frete.getText());
 			order.setFreight(frete);
 		}
-		
+
 		order.setShipName(tf_expedidor_nome.getText());
 
 		order.setOrders_detail(OD);
 		return order;
+	}
+
+	public void refreshDados() {
+
+		tf_cliente_id.setText("");
+		tf_cliente_nome.setText("");
+		tf_empl_id.setText("");
+		tf_empl_nome.setText("");
+		tf_data_pedido.setText("");
+		tf_data_requerida.setText("");
+		tf_data_envio.setText("");
+		tf_expedidor_nome.setText("");
+		tf_expedidor_id.setText("");
+		tf_frete.setText("");
+
+		montarTabelaEdit();
+
 	}
 }
